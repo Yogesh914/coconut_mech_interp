@@ -24,7 +24,7 @@ Match the repository’s history: short, imperative commit subjects such as `Upd
 
 To set up a new experiment, work with the user to:
 
-1. **Agree on a run tag**: propose a folder name based on today's date (e.g. `mar5`). The branch `coconut_mech_interp/<tag>` must not already exist — this is a fresh run.
+1. **Agree on a run tag**: propose a folder name based on today's date (e.g. `mar5`). The branch `experiment/<tag>` must not already exist — this is a fresh run.
 2. **Create the folder**
 3. **Read the in-scope files**: The repo is small. Read these files for full context:
    - `README.md` — repository context. and all the other files mentioned
@@ -36,10 +36,10 @@ Once you get confirmation, kick off the experimentation.
 
 ## Experimentation
 
-Each experiment runs on a single MPS Apple MacBook.
+Each experiment runs on a single GPU. The training script runs for a fixed time budget of 10 minutes (wall clock training time, excluding startup/compilation). You launch it simply as: uv run experiment.py.
 
 **What you CAN do:**
-- Modify only your own code and experiments in the experiments folder.
+- Modify `./experiments/experiment.py` — this is the only file you edit.
 
 **What you CANNOT do:**
 - Modify `coconut.py` or any other code in the current state of the repository, only add to it.
@@ -47,7 +47,7 @@ Each experiment runs on a single MPS Apple MacBook.
 
 **The first run**: Your very first run should always be to just have an experiment running the model from the checkpoint and if implemented correctly you should see 33.4% as the test set accuracy.
 
-**The goal is simple.** The goal is that you want to steer the COCONUT model to be able to increase accuracy significantly on GSM8K test set. The goal is to do novel mechanistic interpretability research on this model and discover something that has not been seen before, something big for a NeurIPS level research paper. I have also a summary of a paper doing mech interp research on coconut models that got into NeurIPS as well at `paper_summary.md`. This paper will give you an idea of everything done in the mech interp space with this model, DON'T FOLLOW UP OR COPY THE IDEA FROM THIS PAPER, YOU ARE EXPLORING IN OTHER SPACES OF MECHANISTIC INTERPRETABILITY. The model checkpoint you will be working with will be different as it is a GPT2 level sized model not 2 layers, and is trained on GSM8K instead. Explore ideas of vector steering to see if we can steer the model towards correct answers, and also explore if there is anything interesting in the mech interp side as the model does worse than regular CoT with the GSM8K dataset, maybe steering the model to think more/harder or steering the model to think more broadly than narrow. You want to steer the model to be able to increase accuracy significantly. You may also web search for further research and context about the field.
+**The goal is simple.** The goal is that you want to steer the COCONUT model to be able to increase accuracy significantly on GSM8K test set. While also doing novel mechanistic interpretability research on this model and discover something that has not been seen before, something big for a NeurIPS level research paper. I have also a summary of a paper doing mech interp research on coconut models that got into NeurIPS as well at `paper_summary.md`. This paper will give you an idea of everything done in the mech interp space with this model, DON'T FOLLOW UP OR COPY THE IDEA FROM THIS PAPER, YOU ARE EXPLORING IN OTHER SPACES OF MECHANISTIC INTERPRETABILITY. The model checkpoint you will be working with will be different as it is a GPT2 level sized model not 2 layers, and is trained on GSM8K instead. Explore ideas of vector steering to see if we can steer the model towards correct answers, and also explore if there is anything interesting in the mech interp side as the model does worse than regular CoT with the GSM8K dataset, maybe steering the model to think more/harder or steering the model to think more broadly than narrow. You want to steer the model to be able to increase accuracy significantly. You may also web search for further research and context about the field.
 
 **Remember you have access to skills as well.**
 
@@ -62,6 +62,8 @@ You are only allowed to run and code one `experiment.py` file, and will keep upd
 
 ## The experiment loop
 
+The experiment runs on a dedicated branch (e.g. experiments/mar5 or experiments/mar5-gpu0).
+
 LOOP FOREVER:
 
 1. Look at the git state: the current branch/commit we're on
@@ -70,7 +72,7 @@ LOOP FOREVER:
 4. Run the experiment: `uv run experiment.py > run.log 2>&1` (redirect everything — do NOT use tee or let output flood your context)
 5. Read out the results: `grep "^val_bpb:\|^peak_vram_mb:" run.log`
 6. If the grep output is empty, the run crashed. Run `tail -n 50 run.log` to read the Python stack trace and attempt a fix. If you can't get things to work after more than a few attempts, give up.
-7. Record the results in the tsv (NOTE: do not commit the results.tsv file, leave it untracked by git)
+7. Record the results in the tsv (NOTE: do not commit the `./experiments/results.tsv` file, leave it untracked by git)
 8. If accuracy improved, you "advance" the branch, keeping the git commit
 9. If accuracy is around equal or worse, you git reset back to where you started
 
