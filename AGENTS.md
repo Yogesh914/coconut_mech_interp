@@ -24,13 +24,20 @@ Match the repository’s history: short, imperative commit subjects such as `Upd
 
 To set up a new experiment, work with the user to:
 
-1. **Agree on a run tag**: propose a folder name based on today's date (e.g. `mar5`). The branch `experiment/<tag>` must not already exist — this is a fresh run.
-2. **Create the folder**
-3. **Read the in-scope files**: The repo is small. Read these files for full context:
-   - `README.md` — repository context. and all the other files mentioned
-4. **Confirm and go**: Confirm setup looks good.
+1. **Create the folder**
+2. **Read the in-scope files**: The repo is small. Read these files for full context:
 
-The main checkpoint to use is at `/workspace/coconut_interp/checkpoint_23` which was a result from the run of `torchrun --nnodes 1 --nproc_per_node 4 run.py args/gsm_coconut.yaml`
+The main checkpoint to use is at:
+```
+from huggingface_hub import hf_hub_download
+
+print("loading weights")
+checkpoint_path = hf_hub_download(
+    repo_id="Shibo-UCSD/coconut-theory",
+    filename="checkpoint_300"
+)
+```
+You will be working with the ProsQA dataset.
 
 Once you get confirmation, kick off the experimentation.
 
@@ -39,7 +46,7 @@ Once you get confirmation, kick off the experimentation.
 Each experiment runs on a single GPU. The training script runs for a fixed time budget of 10 minutes (wall clock training time, excluding startup/compilation). You launch it simply as: uv run experiment.py.
 
 **What you CAN do:**
-- Modify `./experiments/experiment.py` — this is the only file you edit.
+- Modify files in `./experiments/` — this is the only files you edit.
 
 **What you CANNOT do:**
 - Modify `coconut.py` or any other code in the current state of the repository, only add to it.
@@ -47,7 +54,7 @@ Each experiment runs on a single GPU. The training script runs for a fixed time 
 
 **The first run**: Your very first run should always be to just have an experiment running the model from the checkpoint and if implemented correctly you should see 33.4% as the test set accuracy.
 
-**The goal is simple.** The goal is that you want to steer the COCONUT model to be able to increase accuracy significantly on GSM8K test set. While also doing novel mechanistic interpretability research on this model and discover something that has not been seen before, something big for a NeurIPS level research paper. I have also a summary of a paper doing mech interp research on coconut models that got into NeurIPS as well at `paper_summary.md`. This paper will give you an idea of everything done in the mech interp space with this model, DON'T FOLLOW UP OR COPY THE IDEA FROM THIS PAPER, YOU ARE EXPLORING IN OTHER SPACES OF MECHANISTIC INTERPRETABILITY. The model checkpoint you will be working with will be different as it is a GPT2 level sized model not 2 layers, and is trained on GSM8K instead. Explore ideas of vector steering to see if we can steer the model towards correct answers, and also explore if there is anything interesting in the mech interp side as the model does worse than regular CoT with the GSM8K dataset, maybe steering the model to think more/harder or steering the model to think more broadly than narrow. You want to steer the model to be able to increase accuracy significantly. You may also web search for further research and context about the field.
+**The goal is simple.** The goal is that you want to steer the COCONUT model to be able to increase accuracy significantly on GSM8K test set. While also doing novel mechanistic interpretability research on this model and discover something that has not been seen before, something big for a NeurIPS level research paper. I have also a summary of a paper doing mech interp research on coconut models that got into NeurIPS as well at `paper_summary.md`. This paper will give you an idea of everything done in the mech interp space with this model, DON'T FOLLOW UP OR COPY THE IDEA FROM THIS PAPER, YOU ARE EXPLORING IN OTHER SPACES OF MECHANISTIC INTERPRETABILITY. The model checkpoint you will be working with is the same one used from the paper, its shown in notebook.ipynb. Explore ideas of vector steering to see if we can steer the model towards correct answers, and also explore if there is anything interesting in the mech interp side maybe steering the model to think more/harder or steering the model to think more broadly than narrow. You want to steer the model to be able to increase accuracy significantly. You may also web search for further research and context about the field. You must follow the instructions and ideas in **idea_kernel.md** which has the main ideas on what to do.
 
 **Remember you have access to skills as well.**
 
@@ -57,24 +64,14 @@ When an experiment is done, log it to `findings.md` (here you log all your findi
 
 Make sure all experimental things fall under a folder called `experiments` and make sure to double check always the tokenizer and the implementations, make sure to use exactly the code provided for inference for this model, you may import the functions and use them directly, from `run.py` `coconut.py` `dataset.py` 
 
-You are only allowed to run and code one `experiment.py` file, and will keep updating it.
+You are only allowed to run and code within the experiments folder, and will keep updating it.
 
 
 ## The experiment loop
 
-The experiment runs on a dedicated branch (e.g. experiments/mar5 or experiments/mar5-gpu0).
+First make sure with your own implementation its correct by making sure you are doing the exact same as `run.py` `coconut.py` `dataset.py` in the sense of your implementation of inference, tokenizer etc.
 
-LOOP FOREVER:
-
-1. Look at the git state: the current branch/commit we're on
-2. Tune `experiment.py` with an experimental idea by directly hacking the code.
-3. git commit
-4. Run the experiment: `uv run experiment.py > run.log 2>&1` (redirect everything — do NOT use tee or let output flood your context)
-5. Read out the results: `grep "^val_bpb:\|^peak_vram_mb:" run.log`
-6. If the grep output is empty, the run crashed. Run `tail -n 50 run.log` to read the Python stack trace and attempt a fix. If you can't get things to work after more than a few attempts, give up.
-7. Record the results in the tsv (NOTE: do not commit the `./experiments/results.tsv` file, leave it untracked by git)
-8. If accuracy improved, you "advance" the branch, keeping the git commit
-9. If accuracy is around equal or worse, you git reset back to where you started
+LOOP FOREVER   
 
 The idea is that you are a completely autonomous researcher trying things out. If they work, keep. If they don't, discard. And you're advancing the branch so that you can iterate. If you feel like you're getting stuck in some way, you can rewind but you should probably do this very very sparingly (if ever).
 
